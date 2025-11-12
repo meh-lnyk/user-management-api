@@ -18,3 +18,17 @@ def create_table():
     """)
     conn.commit()
     conn.close()
+
+def fetch_all_employees():
+    conn = sqlite3.connect("employees.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT full_name, birth_date, gender
+        FROM employees
+        GROUP BY full_name, birth_date
+        ORDER BY full_name
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

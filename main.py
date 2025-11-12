@@ -1,5 +1,5 @@
 import sys
-from db import create_table
+from db import *
 from employee import Employee
 
 def main():
@@ -22,7 +22,14 @@ def main():
         employee = Employee(full_name, birth_date, gender)
         employee.save_to_db()
         print(f"Employee saved: {employee.full_name}, age {employee.calculate_age()}")
-
+    elif mode == "3":
+        rows = fetch_all_employees()
+        if not rows:
+            print("No employees found.")
+        else:
+            for full_name, birth_date, gender in rows:
+                emp = Employee(full_name, birth_date, gender)
+                print(f"{emp.full_name}, {emp.birth_date}, {emp.gender}, {emp.calculate_age()} years")
     else:
         print("Unknown mode")
 
