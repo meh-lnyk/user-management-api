@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import random
 import string
@@ -84,6 +85,57 @@ def main():
             f.write(f"Rows found: {len(rows)}\n")
             f.write(f"Criteria: Male employees, full_name starting with 'F'\n\n")
         print(f"Log saved: {filename}")
+    elif mode == "6":
+        LOG_DIR = "logs"
+        os.makedirs(LOG_DIR, exist_ok=True)
+
+        filename = os.path.join(
+            LOG_DIR,
+            datetime.now().strftime("%Y-%m-%d_%H-%M-%S-log.txt")
+        )
+
+        conn = sqlite3.connect("employees.db")
+        cursor = conn.cursor()
+        # Removing previous index if exists(in case it was left by the previous run of the script)
+        cursor.execute("DROP INDEX IF EXISTS idx_fullname_gender")
+        conn.commit()
+
+        # Before optimization
+        start1 = time.perf_counter()
+        rows_before = fetch_employees_by_criteria("F", "Male")
+        time_before = time.perf_counter() - start1
+
+        # Creating index
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_fullname_gender
+            ON employees(full_name, gender)
+        """)
+        conn.commit()
+        conn.close()
+
+        # After optimization
+        start2 = time.perf_counter()
+        rows_after = fetch_employees_by_criteria("F", "Male")
+        time_after = time.perf_counter() - start2
+
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write("=== Optimization Log ===\n")
+            f.write(f"Date: {datetime.now()}\n\n")
+
+            f.write("Before optimization:\n")
+            f.write(f"Time: {time_before:.6f} seconds\n")
+            f.write(f"Rows: {len(rows_before)}\n\n")
+
+            f.write("Optimization:\n")
+            f.write("Created index idx_fullname_gender\n")
+            f.write("This index speeds up LIKE 'F%' + gender='Male'\n")
+            f.write("by avoiding full table scan.\n\n")
+
+            f.write("After optimization:\n")
+            f.write(f"Time: {time_after:.6f} seconds\n")
+            f.write(f"Rows: {len(rows_after)}\n")
+
+        print(f"Optimization complete! Log saved: {filename}")
     else:
         print("Unknown mode")
 
