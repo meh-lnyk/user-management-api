@@ -32,3 +32,17 @@ def fetch_all_employees():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+def fetch_employees_by_criteria(fullname: str, gender: str):
+    conn = sqlite3.connect("employees.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT full_name, birth_date, gender
+        FROM employees
+        WHERE full_name LIKE ?
+            AND gender = ?
+    """, (fullname + "%", gender))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

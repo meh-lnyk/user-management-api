@@ -1,10 +1,14 @@
+from datetime import datetime
 import random
 import string
 import sys
+import time
+
 from db import *
 from employee import Employee, random_name, random_birth_date
 
 
+# noinspection SpellCheckingInspection
 def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <mode>")
@@ -59,6 +63,28 @@ def main():
         extra_emps = [Employee(random_name("F"), random_birth_date(), "Male") for _ in range(extra_F_employees)]
         Employee.bulk_insert(extra_emps)
         print("Done!")
+    elif mode == "5":
+        print("Looking for male employees starting with 'F'...")
+        start = time.perf_counter()
+        rows = fetch_employees_by_criteria("F", "Male")
+        if not rows:
+            print("No employees found.")
+        else:
+            for full_name, birth_date, gender in rows:
+                emp = Employee(full_name, birth_date, gender)
+                print(f"{emp.full_name}, {emp.birth_date}, {emp.gender}")
+            print("Done!")
+        performance_time = time.perf_counter() - start
+        print("Performance time: ", performance_time)
+
+        filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-log.txt")
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(f"=== Query Performance Log ===\n")
+            f.write(f"Date: {datetime.now()}\n")
+            f.write(f"Query executed in: {performance_time:.6f} seconds\n")
+            f.write(f"Rows found: {len(rows)}\n")
+            f.write(f"Criteria: Male employees, full_name starting with 'F'\n\n")
+        print(f"Log saved: {filename}")
     else:
         print("Unknown mode")
 
