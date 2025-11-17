@@ -184,3 +184,4 @@ cython_debug/
 employees.db
 *.txt
 /logs
+
