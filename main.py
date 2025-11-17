@@ -83,8 +83,17 @@ def main():
             f.write(f"Date: {datetime.now()}\n")
             f.write(f"Query executed in: {performance_time:.6f} seconds\n")
             f.write(f"Rows found: {len(rows)}\n")
-            f.write(f"Criteria: Male employees, full_name starting with 'F'\n\n")
+            f.write(f"Criteria: Male employees, full_name starting with 'F'\n")
         print(f"Log saved: {filename}")
+
+        ru_filename = datetime.now().strftime("%Y-%m-%d_%H-%M-%S-log-ru.txt")
+        with open(ru_filename, "w", encoding="utf-8") as f:
+            f.write(f"=== Журнал производительности запроса ===\n")
+            f.write(f"Дата: {datetime.now()}\n")
+            f.write(f"Время выполнения запроса: {performance_time:.6f} секунд\n")
+            f.write(f"Найдено строк: {len(rows)}\n")
+            f.write(f"Критерии: Мужчины, full_name начинается с 'F'\n")
+        print(f"RU log saved: {ru_filename}")
     elif mode == "6":
         LOG_DIR = "logs"
         os.makedirs(LOG_DIR, exist_ok=True)
@@ -92,6 +101,11 @@ def main():
         filename = os.path.join(
             LOG_DIR,
             datetime.now().strftime("%Y-%m-%d_%H-%M-%S-log.txt")
+        )
+
+        ru_filename = os.path.join(
+            LOG_DIR,
+            datetime.now().strftime("%Y-%m-%d_%H-%M-%S-log-ru.txt")
         )
 
         conn = sqlite3.connect("employees.db")
@@ -136,6 +150,26 @@ def main():
             f.write(f"Rows: {len(rows_after)}\n")
 
         print(f"Optimization complete! Log saved: {filename}")
+
+        with open(ru_filename, "w", encoding="utf-8") as f:
+            f.write("=== Журнал оптимизации ===\n")
+            f.write(f"Дата: {datetime.now()}\n\n")
+
+            f.write("До оптимизации:\n")
+            f.write(f"Время: {time_before:.6f} секунд\n")
+            f.write(f"Строк найдено: {len(rows_before)}\n\n")
+
+            f.write("Оптимизация:\n")
+            f.write("Создан индекс idx_fullname_gender\n")
+            f.write("Этот индекс ускоряет LIKE 'F%' + gender='Male'\n")
+            f.write("за счёт избегания полного сканирования таблицы.\n\n")
+
+            f.write("После оптимизации:\n")
+            f.write(f"Время: {time_after:.6f} секунд\n")
+            f.write(f"Строк найдено: {len(rows_after)}\n")
+
+        print(f"Оптимизация завершена! Журнал сохранён: {ru_filename}")
+
     else:
         print("Unknown mode")
 
